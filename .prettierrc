@@ -1,0 +1,37 @@
+{
+  "tailwindConfig": "./tailwind.config",
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "trailingComma": "es5",
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "htmlWhitespaceSensitivity": "ignore",
+  "plugins": [
+    {
+      "name": "uts",
+      "parsers": ["typescript"],
+      "vscodeLanguageIds": ["uts"]
+    },
+    "prettier-plugin-tailwindcss"
+  ],
+  "overrides": [
+    {
+      "files": "*.uvue",
+      "options": {
+        "parser": "vue",
+        "singleAttributePerLine": false,
+        "printWidth": 120
+      }
+    },
+    {
+      "files": "*.uts",
+      "options": {
+        "parser": "typescript"
+      }
+    }
+  ]
+}
