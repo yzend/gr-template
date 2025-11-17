@@ -1,0 +1,93 @@
+<template>
+  <cl-select :modelValue="modelValue" :options="basePresetOptions" @change="handleChange"></cl-select>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import type { ClSelectOption } from '@/uni_modules/cool-ui';
+
+defineOptions({
+  name: 'base-preset-select',
+});
+
+// 定义 props
+type Props = {
+  modelValue: string;
+  cameraModel: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: 'positive',
+  cameraModel: 'gr3',
+});
+
+// 定义 emits
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'change', value: string): void;
+}>();
+
+// 通用预设选项
+const commonPresets: ClSelectOption[] = [
+  { label: '正片', value: 'positive' },
+  { label: '负片', value: 'negative' },
+  { label: '鲜艳', value: 'vivid' },
+  { label: '单色', value: 'monochrome' },
+];
+
+// GR2 专用预设
+const gr2Presets: ClSelectOption[] = [
+  { label: '正片', value: 'positive' },
+  { label: '负片', value: 'negative' },
+  { label: '鲜艳', value: 'vivid' },
+  { label: '单色', value: 'monochrome' },
+  { label: '漂白效果', value: 'bleach_bypass' },
+];
+
+// GR3 专用预设
+const gr3Presets: ClSelectOption[] = [
+  { label: '正片', value: 'positive' },
+  { label: '负片', value: 'negative' },
+  { label: '鲜艳', value: 'vivid' },
+  { label: '单色', value: 'monochrome' },
+  { label: '漂白效果', value: 'bleach_bypass' },
+  { label: '怀旧', value: 'retro' },
+  { label: '高对比度黑白', value: 'high_contrast_bw' },
+];
+
+// GR4 专用预设
+const gr4Presets: ClSelectOption[] = [
+  { label: '正片', value: 'positive' },
+  { label: '负片', value: 'negative' },
+  { label: '鲜艳', value: 'vivid' },
+  { label: '单色', value: 'monochrome' },
+  { label: '漂白效果', value: 'bleach_bypass' },
+  { label: '怀旧', value: 'retro' },
+  { label: '高对比度黑白', value: 'high_contrast_bw' },
+  { label: '柔和', value: 'soft' },
+  { label: '电影效果', value: 'cinema' },
+];
+
+// 根据相机型号动态生成预设选项
+const basePresetOptions = computed<ClSelectOption[]>(() => {
+  switch (props.cameraModel) {
+    case 'gr2':
+      return gr2Presets;
+    case 'gr3':
+      return gr3Presets;
+    case 'gr4':
+      return gr4Presets;
+    default:
+      return commonPresets;
+  }
+});
+
+// 处理选择变化
+function handleChange(value: string | number) {
+  const stringValue = String(value);
+  emit('update:modelValue', stringValue);
+  emit('change', stringValue);
+}
+</script>
+
+<style lang="scss" scoped></style>

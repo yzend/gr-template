@@ -1,0 +1,219 @@
+<template>
+  <cl-page>
+    <cl-topbar
+      fixed
+      :show-back="false"
+      safe-area-top
+      :height="isMp() ? null : 100"
+      :pt="{
+        className: '!z-50',
+      }"
+    >
+      <view
+        class="flex w-full flex-1 flex-row items-center p-3"
+        :class="{
+          'pt-0': isMp(),
+        }"
+      >
+        <view class="rounded-lg bg-primary-500 p-[12rpx]">
+          <cl-image src="/static/logo.png" :width="32" :height="32" :show-loading="false"></cl-image>
+        </view>
+
+        <cl-text
+          :pt="{
+            className: '!text-xl mr-auto ml-2 flex-1',
+          }"
+        >
+          {{ config.name }}
+        </cl-text>
+      </view>
+    </cl-topbar>
+
+    <!-- 筛选栏 -->
+    <!-- <cl-filter-bar> -->
+    <!-- 上传时间下拉 -->
+    <!-- <cl-filter-item
+        :label="uploadTimeText"
+        type="select"
+        :value="uploadTime"
+        :options="uploadTimeOptions"
+        :pt="{
+          className: 'w-[220rpx] !flex-none',
+        }"
+        @change="onUploadTimeChange"
+      ></cl-filter-item> -->
+
+    <!-- Tags筛选按钮 -->
+    <!-- <view class="flex flex-1 flex-row items-center justify-center" @tap="openTagsFilter">
+        <cl-text>Tags</cl-text>
+        <cl-icon name="arrow-down-s-line" :size="16" class="ml-1"></cl-icon>
+      </view> -->
+    <!-- </cl-filter-bar> -->
+
+    <!-- Tags 筛选弹窗 -->
+    <!-- <cl-popup v-model="tagsFilterVisible" title="选择 Tags" direction="bottom" size="50%" :show-header="true">
+      <view class="flex h-full flex-col">
+        <scroll-view class="flex-1">
+          <cl-form :pt="{ className: 'p-3' }">
+            <cl-form-item label="Tags">
+              <cl-row :gutter="20">
+                <cl-col :span="8" v-for="(tag, index) in categories" :key="index">
+                  <cl-checkbox
+                    v-model="selectedTags"
+                    :label="tag.label"
+                    :value="tag.value"
+                    :show-icon="false"
+                    :pt="{
+                      className: parseClass([
+                        'mb-3 p-2 rounded-lg justify-center border border-solid border-transparent',
+                        [isDark, 'bg-surface-800', 'bg-surface-100'],
+                        [
+                          selectedTags.includes(tag.value),
+                          `${isDark ? '!bg-surface-700' : '!bg-white'} !border-primary-500`,
+                        ],
+                      ]),
+                      label: {
+                        className: 'text-sm',
+                      },
+                    }"
+                  ></cl-checkbox>
+                </cl-col>
+              </cl-row>
+            </cl-form-item>
+          </cl-form>
+        </scroll-view>
+
+        <view class="flex flex-row p-3">
+          <cl-button
+            type="info"
+            text
+            border
+            :pt="{
+              className: 'flex-1',
+            }"
+            @tap="resetTags"
+          >
+            重置
+          </cl-button>
+          <cl-button
+            :pt="{
+              className: 'flex-1',
+            }"
+            @tap="confirmTags"
+          >
+            确定
+          </cl-button>
+        </view>
+
+        <cl-safe-area type="bottom"></cl-safe-area>
+      </view>
+    </cl-popup> -->
+
+    <!-- 瀑布流图片 -->
+    <view class="py-2">
+      <cl-waterfall ref="waterfallRef" :column="2" :gutter="16">
+        <template #item="{ item }">
+          <image-card
+            class="mb-3"
+            :value="item"
+            @tap="onImageTap"
+            @bookmark="onBookmark"
+            @download="onDownload"
+          ></image-card>
+        </template>
+      </cl-waterfall>
+    </view>
+
+    <!-- 自定义底部导航栏 -->
+    <custom-tabbar></custom-tabbar>
+  </cl-page>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { isApp, isMp, router, useRefs, parseClass, isDark } from '@/cool';
+import CustomTabbar from '@/components/tabbar.uvue';
+import ImageCard from './components/discover/image-card.uvue';
+import { config } from '@/config';
+import { mockImageList } from '@/data/mock';
+import type { ClSelectOption } from '@/uni_modules/cool-ui';
+
+defineOptions({
+  name: 'discover',
+});
+
+const refs = useRefs();
+const waterfallRef = ref<ClWaterfallComponentPublicInstance | null>(null);
+
+// 上传时间选项
+const uploadTimeOptions = ref<ClSelectOption[]>([
+  { label: '最新上传', value: 'latest' },
+  { label: '本周上传', value: 'week' },
+  { label: '本月上传', value: 'month' },
+]);
+
+const uploadTime = ref<string | number>('latest');
+const uploadTimeText = computed(() => {
+  return uploadTimeOptions.value.find((item) => item.value == uploadTime.value)?.label ?? '最新上传';
+});
+
+// Tags 分类选项
+const categories = [
+  { label: '街头', value: 'street' },
+  { label: '人像', value: 'portrait' },
+  { label: '风景', value: 'landscape' },
+  { label: '胶片', value: 'film' },
+  { label: '黑白', value: 'blackAndWhite' },
+];
+
+const selectedTags = ref<string[]>([]);
+const tagsFilterVisible = ref(false);
+
+// 初始化瀑布流数据
+function initWaterfall() {
+  if (waterfallRef.value != null) {
+    waterfallRef.value.append(mockImageList);
+  }
+}
+
+function onUploadTimeChange(value: string | number) {
+  uploadTime.value = value;
+  console.log('上传时间改变:', value);
+  // TODO: 根据上传时间筛选图片
+}
+
+function openTagsFilter() {
+  tagsFilterVisible.value = true;
+}
+
+function resetTags() {
+  selectedTags.value = [];
+}
+
+function confirmTags() {
+  tagsFilterVisible.value = false;
+  console.log('已选择 Tags:', selectedTags.value);
+  // TODO: 根据 Tags 筛选图片
+}
+
+function onImageTap(item: any) {
+  // TODO: 跳转到图片详情页
+  console.log('点击图片:', item);
+}
+
+function onBookmark(item: any) {
+  // 收藏状态由组件内部管理
+  console.log('收藏:', item);
+}
+
+function onDownload(item: any) {
+  // TODO: 下载图片
+  console.log('下载:', item);
+}
+
+onMounted(() => {
+  initWaterfall();
+});
+</script>
+
+<style lang="scss" scoped></style>

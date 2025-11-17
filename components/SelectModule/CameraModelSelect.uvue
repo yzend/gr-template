@@ -1,0 +1,43 @@
+<template>
+  <cl-select :modelValue="modelValue" :options="cameraModelOptions" @change="handleChange"></cl-select>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import type { ClSelectOption } from '@/uni_modules/cool-ui';
+
+defineOptions({
+  name: 'camera-model-select',
+});
+
+// 定义 props
+type Props = {
+  modelValue: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: 'gr3',
+});
+
+// 定义 emits
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'change', value: string): void;
+}>();
+
+// 相机型号选项
+const cameraModelOptions = ref<ClSelectOption[]>([
+  { label: 'GR2', value: 'gr2' },
+  { label: 'GR3', value: 'gr3' },
+  { label: 'GR4', value: 'gr4' },
+]);
+
+// 处理选择变化
+function handleChange(value: string | number) {
+  const stringValue = String(value);
+  emit('update:modelValue', stringValue);
+  emit('change', stringValue);
+}
+</script>
+
+<style lang="scss" scoped></style>

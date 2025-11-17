@@ -1,0 +1,76 @@
+<template>
+  <cl-page>
+    <cl-topbar
+      fixed
+      :show-back="false"
+      safe-area-top
+      :height="isMp() ? null : 100"
+      :pt="{
+        className: '!z-50',
+      }"
+    >
+      <view
+        class="flex w-full flex-1 flex-row items-center p-3"
+        :class="{
+          'pt-0': isMp(),
+        }"
+      >
+        <cl-text
+          :pt="{
+            className: '!text-xl mr-auto ml-2 flex-1',
+          }"
+        >
+          我的预设
+        </cl-text>
+      </view>
+    </cl-topbar>
+
+    <!-- 预设展示 -->
+    <view class="p-3 pb-20">
+      <cl-row :gutter="20">
+        <cl-col :span="24" v-for="item in imageList" :key="item.id">
+          <image-card
+            class="mb-4"
+            :value="item"
+            @tap="onImageTap"
+            @bookmark="onBookmark"
+            @download="onDownload"
+          ></image-card>
+        </cl-col>
+      </cl-row>
+    </view>
+
+    <!-- 自定义底部导航栏 -->
+    <custom-tabbar></custom-tabbar>
+  </cl-page>
+</template>
+
+<script setup lang="ts">
+import { isMp } from '@/cool';
+import CustomTabbar from '@/components/tabbar.uvue';
+import { mockImageList } from '@/data/mock';
+import { ref } from 'vue';
+import ImageCard from './components/discover/image-card.uvue';
+
+const imageList = ref(mockImageList);
+
+function onImageTap(item: any) {
+  // TODO: 跳转到图片详情页
+  console.log('点击图片:', item);
+}
+
+function onBookmark(item: any) {
+  const index = imageList.value.findIndex((img) => img.id == item.id);
+  if (index != -1) {
+    imageList.value[index].is_bookmarked = !imageList.value[index].is_bookmarked;
+  }
+  console.log('收藏:', item);
+}
+
+function onDownload(item: any) {
+  // TODO: 下载图片
+  console.log('下载:', item);
+}
+</script>
+
+<style lang="scss" scoped></style>

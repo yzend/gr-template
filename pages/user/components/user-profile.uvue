@@ -1,0 +1,299 @@
+<template>
+  <view class="user-profile">
+    <!-- 用户信息区域 -->
+    <view class="flex flex-col items-center pb-4 pt-6">
+      <!-- 头像 -->
+      <view class="relative mb-4">
+        <cl-avatar
+          :src="userInfo.avatar_url"
+          :size="120"
+          class="border-4 border-surface-100 dark:border-surface-800"
+        ></cl-avatar>
+        <!-- 编辑头像按钮 -->
+        <view
+          class="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-green-500"
+          @tap="handleEditAvatar"
+        >
+          <cl-icon name="camera-line" :size="20" color="white"></cl-icon>
+        </view>
+      </view>
+
+      <!-- 用户名 -->
+      <cl-text
+        :pt="{
+          className: '!text-2xl font-bold mb-2',
+        }"
+      >
+        {{ userInfo.name }}
+      </cl-text>
+
+      <!-- 个人简介 -->
+      <cl-text
+        v-if="userInfo.bio"
+        :pt="{
+          className: '!text-sm opacity-70 text-center px-8',
+        }"
+      >
+        {{ userInfo.bio }}
+      </cl-text>
+    </view>
+
+    <!-- 统计数据区域 -->
+    <view class="mx-4 mb-6 flex flex-row rounded-2xl border border-surface-200 dark:border-surface-700">
+      <!-- 上传数 -->
+      <view class="flex flex-1 flex-col items-center py-6" @tap="handleUploadClick">
+        <cl-text
+          :pt="{
+            className: '!text-3xl font-bold mb-1',
+          }"
+        >
+          {{ userInfo.upload_count }}
+        </cl-text>
+        <cl-text
+          :pt="{
+            className: '!text-sm opacity-60',
+          }"
+        >
+          上传
+        </cl-text>
+      </view>
+
+      <!-- 分隔线 -->
+      <view class="w-px bg-surface-200 dark:bg-surface-700"></view>
+
+      <!-- 收藏数 -->
+      <view class="flex flex-1 flex-col items-center py-6" @tap="handleCollectClick">
+        <cl-text
+          :pt="{
+            className: '!text-3xl font-bold mb-1',
+          }"
+        >
+          {{ userInfo.collect_count }}
+        </cl-text>
+        <cl-text
+          :pt="{
+            className: '!text-sm opacity-60',
+          }"
+        >
+          收藏
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 标签页 -->
+    <view class="mb-4">
+      <cl-tabs v-model="activeTab" :options="tabOptions" @change="handleTabChange"></cl-tabs>
+    </view>
+
+    <!-- 内容区域 -->
+    <view class="px-4">
+      <!-- 我的预设 -->
+      <view v-if="activeTab === 0">
+        <cl-waterfall ref="waterfallRef" :column="2" :gap="12">
+          <view
+            v-for="(item, index) in myPresets"
+            :key="item.id"
+            class="mb-3 overflow-hidden rounded-lg"
+            @tap="handlePresetClick(item)"
+          >
+            <cl-image
+              :src="item.preview_images[0]?.after || ''"
+              mode="aspectFill"
+              :width="waterfallWidth"
+              :height="waterfallHeight"
+              class="w-full"
+            ></cl-image>
+            <view class="bg-surface-50 p-3 dark:bg-surface-900">
+              <cl-text
+                :pt="{
+                  className: '!text-base font-semibold mb-2',
+                }"
+              >
+                {{ item.name }}
+              </cl-text>
+              <view class="flex flex-row items-center">
+                <!-- 下载数 -->
+                <view class="mr-4 flex flex-row items-center">
+                  <cl-icon name="download-line" :size="16" class="mr-1"></cl-icon>
+                  <cl-text
+                    :pt="{
+                      className: '!text-xs opacity-60',
+                    }"
+                  >
+                    {{ formatNumber(item.likes * 0.4) }}
+                  </cl-text>
+                </view>
+                <!-- 收藏数 -->
+                <view class="flex flex-row items-center">
+                  <cl-icon name="bookmark-line" :size="16" class="mr-1"></cl-icon>
+                  <cl-text
+                    :pt="{
+                      className: '!text-xs opacity-60',
+                    }"
+                  >
+                    {{ formatNumber(item.likes * 0.6) }}
+                  </cl-text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </cl-waterfall>
+      </view>
+
+      <!-- 我的收藏 -->
+      <view v-if="activeTab === 1">
+        <cl-waterfall ref="waterfallCollectRef" :column="2" :gap="12">
+          <view
+            v-for="(item, index) in myCollects"
+            :key="item.id"
+            class="mb-3 overflow-hidden rounded-lg"
+            @tap="handlePresetClick(item)"
+          >
+            <cl-image
+              :src="item.preview_images[0]?.after || ''"
+              mode="aspectFill"
+              :width="waterfallWidth"
+              :height="waterfallHeight"
+              class="w-full"
+            ></cl-image>
+            <view class="bg-surface-50 p-3 dark:bg-surface-900">
+              <cl-text
+                :pt="{
+                  className: '!text-base font-semibold mb-2',
+                }"
+              >
+                {{ item.name }}
+              </cl-text>
+              <view class="flex flex-row items-center">
+                <!-- 下载数 -->
+                <view class="mr-4 flex flex-row items-center">
+                  <cl-icon name="download-line" :size="16" class="mr-1"></cl-icon>
+                  <cl-text
+                    :pt="{
+                      className: '!text-xs opacity-60',
+                    }"
+                  >
+                    {{ formatNumber(item.likes * 0.4) }}
+                  </cl-text>
+                </view>
+                <!-- 收藏数 -->
+                <view class="flex flex-row items-center">
+                  <cl-icon name="bookmark-line" :size="16" class="mr-1"></cl-icon>
+                  <cl-text
+                    :pt="{
+                      className: '!text-xs opacity-60',
+                    }"
+                  >
+                    {{ formatNumber(item.likes * 0.6) }}
+                  </cl-text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </cl-waterfall>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue';
+import { router } from '@/cool';
+import type { UserModel } from '@/dataModal/UserModel';
+import type PresetModel from '@/dataModal/PresetModel';
+import { mockImageList } from '@/data/mock';
+
+defineOptions({
+  name: 'user-profile',
+});
+
+// 定义 props
+type Props = {
+  userInfo: UserModel;
+};
+
+const props = defineProps<Props>();
+
+// 标签页
+const activeTab = ref(0);
+const tabOptions = ref([
+  { label: '我的预设', value: 0 },
+  { label: '我的收藏', value: 1 },
+]);
+
+// 瀑布流引用
+const waterfallRef = ref(null);
+const waterfallCollectRef = ref(null);
+
+// 瀑布流尺寸
+const waterfallWidth = ref(0);
+const waterfallHeight = ref(300);
+
+// 我的预设（模拟数据，实际应该从接口获取）
+const myPresets = ref<PresetModel[]>([]);
+
+// 我的收藏（模拟数据，实际应该从接口获取）
+const myCollects = ref<PresetModel[]>([]);
+
+// 初始化瀑布流数据
+function initWaterfall() {
+  const windowInfo = uni.getWindowInfo();
+  const screenWidth = windowInfo.windowWidth;
+  const gap = 12;
+  const padding = 32; // 左右 padding 各 16
+  waterfallWidth.value = (screenWidth - padding - gap) / 2;
+
+  // 模拟数据：前4个作为我的预设
+  myPresets.value = mockImageList.slice(0, 4);
+  // 模拟数据：后2个作为我的收藏
+  myCollects.value = mockImageList.slice(4, 6);
+}
+
+// 格式化数字
+function formatNumber(num: number): string {
+  const rounded = Math.floor(num);
+  if (rounded >= 1000) {
+    return (rounded / 1000).toFixed(1) + 'k';
+  }
+  return rounded.toString();
+}
+
+// 处理编辑头像
+function handleEditAvatar() {
+  // TODO: 实现编辑头像功能
+  router.to('/pages/user/edit');
+}
+
+// 处理上传点击
+function handleUploadClick() {
+  activeTab.value = 0;
+}
+
+// 处理收藏点击
+function handleCollectClick() {
+  activeTab.value = 1;
+}
+
+// 处理标签页切换
+function handleTabChange(value: number) {
+  console.log('Tab changed:', value);
+}
+
+// 处理预设点击
+function handlePresetClick(item: PresetModel) {
+  // TODO: 跳转到预设详情页
+  router.to('/pages/index/preset-detail', {
+    id: item.id,
+  });
+}
+
+onMounted(() => {
+  initWaterfall();
+});
+</script>
+
+<style lang="scss" scoped>
+.user-profile {
+  @apply w-full;
+}
+</style>

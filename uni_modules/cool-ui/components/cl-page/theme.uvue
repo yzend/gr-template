@@ -24,7 +24,7 @@ const list = ["moon-fill", "sun-fill"];
 <style lang="scss" scoped>
 .theme-set {
 	@apply flex flex-col items-center justify-center rounded-full h-full w-full;
-	@apply bg-primary-500;
+	@apply bg-primary-800;
 
 	&__inner {
 		@apply flex flex-col duration-300;

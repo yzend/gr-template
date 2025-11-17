@@ -1,0 +1,100 @@
+<template>
+  <view class="user-not-login">
+    <view class="flex flex-col items-center justify-center px-8 py-20">
+      <!-- 头像占位 -->
+      <view class="mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-surface-200 dark:bg-surface-800">
+        <cl-icon name="user-3-line" :size="64" color="#9ca3af"></cl-icon>
+      </view>
+
+      <!-- 提示文字 -->
+      <cl-text
+        :pt="{
+          className: '!text-xl font-semibold mb-2',
+        }"
+      >
+        未登录
+      </cl-text>
+
+      <cl-text
+        :pt="{
+          className: '!text-sm opacity-60 mb-8 text-center',
+        }"
+      >
+        登录后可查看个人主页、上传预设和收藏作品
+      </cl-text>
+
+      <!-- 微信登录按钮 -->
+      <cl-button
+        :pt="{
+          className: 'w-64 !bg-black dark:!bg-white',
+          label: {
+            className: '!text-base',
+          },
+        }"
+        :color="isDark ? 'black' : 'white'"
+        round
+        open-type="getUserInfo"
+        @getuserinfo="handleWechatLogin"
+      >
+        <view class="flex flex-row items-center justify-center">
+          <cl-icon name="wechat-fill" :size="48" :color="isDark ? 'black' : 'white'" class="mr-2"></cl-icon>
+          <text>微信登录</text>
+        </view>
+      </cl-button>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { router, isDark } from '@/cool';
+import { useUi } from '@/uni_modules/cool-ui';
+
+defineOptions({
+  name: 'user-not-login',
+});
+
+const ui = useUi();
+
+// 处理微信登录
+function handleWechatLogin(res) {
+  // TODO: 实现微信登录逻辑
+  // #ifdef APP
+  // 调用微信登录 SDK
+  // #endif
+
+  // #ifdef MP-WEIXIN
+  // 调用微信小程序登录
+  console.log(res, 'resresres');
+  // #endif
+
+  // 暂时跳转到登录页面
+  // router.to('/pages/user/login');
+}
+
+// 处理其他登录方式
+function handleOtherLogin() {
+  router.to('/pages/user/login');
+}
+
+// 跳转用户协议
+function toUserAgreement() {
+  ui.showToast({
+    message: '查看用户协议',
+  });
+  // TODO: 跳转到用户协议页面
+}
+
+// 跳转隐私政策
+function toPrivacyPolicy() {
+  ui.showToast({
+    message: '查看隐私政策',
+  });
+  // TODO: 跳转到隐私政策页面
+}
+</script>
+
+<style lang="scss" scoped>
+.user-not-login {
+  @apply w-full;
+}
+</style>

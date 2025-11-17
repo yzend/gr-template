@@ -1,0 +1,137 @@
+<template>
+  <view class="image-card relative" @tap="onTap">
+    <cl-image
+      :pt="{
+        inner: {
+          className: '!rounded-none',
+        },
+      }"
+      :src="imageUrl"
+      mode="aspectFill"
+      width="100%"
+      :height="imageHeight"
+      :show-loading="true"
+    ></cl-image>
+
+    <!-- 底部信息栏 -->
+    <view class="bg-black p-3">
+      <!-- 标题 -->
+      <view class="mb-2 flex flex-row justify-between">
+        <cl-text
+          :pt="{
+            className: '!text-base !font-medium text-white',
+          }"
+        >
+          {{ item.name }}
+        </cl-text>
+
+        <!-- 标签 -->
+        <view class="flex flex-row">
+          <view class="rounded-sm bg-surface-800/80 px-2 py-1" v-if="item.tags && item.tags.length > 0">
+            <cl-text
+              :pt="{
+                className: '!text-xs text-white/90',
+              }"
+            >
+              {{ item.tags[0] }}
+            </cl-text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 描述 -->
+      <view class="mb-2">
+        <cl-text
+          :pt="{
+            className: '!text-sm text-white/60',
+          }"
+        >
+          {{ item.description }}
+        </cl-text>
+      </view>
+      <!-- 底部信息栏 -->
+      <view class="mb-2 flex flex-row justify-between">
+        <!-- 作者信息 -->
+        <view class="flex flex-row items-center">
+          <cl-avatar class="mr-2 h-4 w-4 rounded-full" :size="48" :src="item.author.avatar_url"></cl-avatar>
+          <cl-text
+            :pt="{
+              className: '!text-sm text-primary-50',
+            }"
+          >
+            {{ item.author.name }}
+          </cl-text>
+        </view>
+
+        <!-- 统计信息 -->
+        <view class="flex flex-row items-center justify-end gap-4">
+          <view class="flex flex-row items-center gap-1">
+            <cl-icon name="heart-fill" :size="36" color="#ef4444"></cl-icon>
+            <cl-text
+              :pt="{
+                className: '!text-sm text-primary-50',
+              }"
+            >
+              {{ formatNumber(item.likes) }}
+            </cl-text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { parse } from '@/cool';
+
+defineOptions({
+  name: 'image-card',
+});
+
+const props = defineProps({
+  value: {
+    type: Object,
+    required: true,
+  },
+  imageHeight: {
+    type: [String, Number],
+    default: 400,
+  },
+});
+
+const item = computed(() => props.value);
+const imageUrl = computed(() => {
+  const preview_images = item.value?.preview_images[0];
+  return preview_images?.before;
+});
+
+const emit = defineEmits(['tap', 'bookmark', 'download']);
+
+// 格式化数字（1.2k, 2.5k等）
+function formatNumber(num: number): string {
+  if (num >= 1000) {
+    const k = num / 1000;
+    return k.toFixed(1) + 'k';
+  }
+  return num.toString();
+}
+
+function onTap() {
+  emit('tap', item.value!);
+}
+
+function onBookmark() {
+  emit('bookmark', item.value!);
+}
+
+function onDownload() {
+  emit('download', item.value);
+}
+</script>
+
+<style lang="scss" scoped>
+.image-card {
+  @apply overflow-hidden rounded-lg;
+}
+</style>

@@ -1,14 +1,14 @@
 {
-	"name": "cool-unix",
-	"appid": "__UNI__651711F",
-	"description": "完全开源、永久免费、上手容易、效率极高的开发脚手架",
+	"name": "gr-template",
+	"appid": "__UNI__F083057",
+	"description": "gr 开发者末班",
 	"versionName": "1.0.0",
-	"versionCode": "100",
+	"versionCode": "1",
 	"uni-app-x": {},
 	"quickapp": {},
 	"mp-weixin": {
 		"darkmode": true,
-		"appid": "wxdebc4de0b5584ca4",
+		"appid": "wxdbb5318068c56238",
 		"setting": {
 			"urlCheck": false,
 			"es6": true
@@ -43,10 +43,13 @@
 	"web": {
 		"darkmode": true,
 		"router": {
-			"mode": "",
+			"mode": "hash",
 			"base": "./"
 		},
-		"title": "cool-unix"
+		"title": "理光预设",
+		"devServer": {
+			"https": false
+		}
 	},
 	"app-harmony": {
 		"distribute": {

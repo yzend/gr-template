@@ -95,7 +95,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .cl-back-top {
-	@apply flex flex-row items-center justify-center bg-primary-500 rounded-full duration-300;
+	@apply flex flex-row items-center justify-center bg-primary-800 rounded-full duration-300;
 	width: 40px;
 	height: 40px;
 	transition-property: transform;

@@ -1,0 +1,378 @@
+<template>
+  <cl-page>
+    <cl-topbar
+      fixed
+      :show-back="false"
+      safe-area-top
+      :height="isMp() ? null : 100"
+      :pt="{
+        className: '!z-50',
+      }"
+    >
+      <view
+        class="flex w-full flex-1 flex-row items-center p-3"
+        :class="{
+          'pt-0': isMp(),
+        }"
+      >
+        <cl-text
+          :pt="{
+            className: '!text-xl mr-auto ml-2 flex-1',
+          }"
+        >
+          上传预设
+        </cl-text>
+      </view>
+    </cl-topbar>
+
+    <view class="p-3 pb-3">
+      <cl-form>
+        <!-- 展示您的预设 -->
+        <cl-form-item label="展示您的预设">
+          <cl-text
+            :pt="{
+              className: '!text-sm !text-surface-500 mb-3',
+            }"
+          >
+            最多添加 5 张图片（建议使用原始 JPG）
+          </cl-text>
+          <cl-upload v-model="form.preview_images" multiple :limit="5" test></cl-upload>
+        </cl-form-item>
+
+        <!-- 相机型号 -->
+        <cl-form-item label="相机型号" required>
+          <camera-model-select v-model="form.camera_model"></camera-model-select>
+        </cl-form-item>
+
+        <!-- 基础预设 -->
+        <cl-form-item label="基础预设" required>
+          <base-preset-select v-model="form.params.base_preset" :camera-model="form.camera_model"></base-preset-select>
+        </cl-form-item>
+
+        <!-- 预设名称 -->
+        <cl-form-item label="预设名称" required>
+          <cl-input v-model="form.name" placeholder="例如：赛博朋克白街道" clearable></cl-input>
+        </cl-form-item>
+
+        <!-- 标签 -->
+        <cl-form-item label="标签">
+          <view class="flex flex-row flex-wrap">
+            <view
+              v-for="(tag, index) in availableTags"
+              :key="index"
+              class="mb-2 mr-2 rounded-full border border-solid px-4 py-2"
+              :class="
+                parseClass({
+                  'border-black bg-black dark:border-white dark:bg-white': !isTagSelected(tag.value),
+                  'border-surface-300 bg-transparent dark:border-surface-600': isTagSelected(tag.value),
+                })
+              "
+              @tap="toggleTag(tag.value)"
+            >
+              <cl-text
+                :pt="{
+                  className: parseClass([
+                    '!text-sm',
+                    {
+                      '!text-white dark:!text-black': isTagSelected(tag.value),
+                      '!text-white dark:!text-surface-100': !isTagSelected(tag.value),
+                    },
+                  ]),
+                }"
+              >
+                {{ tag.label }}
+              </cl-text>
+            </view>
+          </view>
+        </cl-form-item>
+
+        <!-- 描述您的预设 -->
+        <cl-form-item label="描述您的预设">
+          <cl-textarea
+            v-model="form.description"
+            placeholder="例如：使用场景、光线条件、拍摄时间..."
+            :show-word-limit="true"
+            :maxlength="500"
+            :height="240"
+          ></cl-textarea>
+        </cl-form-item>
+
+        <!-- 白平衡和白平衡偏移 -->
+        <cl-row :gutter="20">
+          <cl-col :span="12">
+            <cl-form-item label="白平衡">
+              <cl-select v-model="form.params.white_balance" :options="whiteBalanceOptions"></cl-select>
+            </cl-form-item>
+          </cl-col>
+          <cl-col :span="12">
+            <cl-form-item label="白平衡偏移">
+              <cl-input v-model="form.params.wb_shift" placeholder="例如: +2"></cl-input>
+            </cl-form-item>
+          </cl-col>
+        </cl-row>
+
+        <!-- 饱和度和色调 -->
+        <cl-row :gutter="20">
+          <cl-col :span="12">
+            <cl-form-item label="饱和度">
+              <cl-slider v-model="form.params.saturation" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+          <cl-col :span="12">
+            <cl-form-item label="色调">
+              <cl-slider v-model="form.params.color_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+        </cl-row>
+
+        <!-- 对比度、高光、阴影 -->
+        <cl-form-item label="对比度">
+          <cl-slider v-model="form.params.contrast" :min="-100" :max="100" :show-value="true"></cl-slider>
+        </cl-form-item>
+
+        <cl-row :gutter="20">
+          <cl-col :span="12">
+            <cl-form-item label="高光">
+              <cl-slider v-model="form.params.contrast_highlight" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+          <cl-col :span="12">
+            <cl-form-item label="阴影">
+              <cl-slider v-model="form.params.contrast_shadow" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+        </cl-row>
+
+        <!-- 锐度和清晰度 -->
+        <cl-row :gutter="20">
+          <cl-col :span="12">
+            <cl-form-item label="锐度">
+              <cl-slider v-model="form.params.sharpness" :min="0" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+          <cl-col :span="12">
+            <cl-form-item label="清晰度">
+              <cl-slider v-model="form.params.clarity" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+        </cl-row>
+
+        <!-- 暗部色调和亮部色调 -->
+        <cl-row :gutter="20">
+          <cl-col :span="12">
+            <cl-form-item label="暗部色调">
+              <cl-slider v-model="form.params.shadow_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+          <cl-col :span="12">
+            <cl-form-item label="亮部色调">
+              <cl-slider v-model="form.params.highlight_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
+            </cl-form-item>
+          </cl-col>
+        </cl-row>
+      </cl-form>
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="bottom-0 left-0 right-0 z-40 p-3 pb-20" style="box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1)">
+      <cl-button
+        :disabled="!isFormValid"
+        :loading="isSubmitting"
+        @tap="handleSubmit"
+        :color="isDark ? 'black' : 'white'"
+        :pt="{
+          className: 'w-full !bg-black dark:!bg-white',
+        }"
+      >
+        发布预设
+      </cl-button>
+    </view>
+
+    <!-- 自定义底部导航栏 -->
+    <custom-tabbar></custom-tabbar>
+  </cl-page>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, reactive } from 'vue';
+import { isDark, isMp, parseClass } from '@/cool';
+import CustomTabbar from '@/components/tabbar.uvue';
+import CameraModelSelect from '@/components/SelectModule/CameraModelSelect.uvue';
+import BasePresetSelect from '@/components/SelectModule/BasePresetSelect.uvue';
+import PresetModel from '@/dataModal/PresetModel';
+import type { ClSelectOption } from '@/uni_modules/cool-ui';
+import { useUi } from '@/uni_modules/cool-ui';
+
+defineOptions({
+  name: 'upload-preset',
+});
+
+const ui = useUi();
+
+// 白平衡选项
+const whiteBalanceOptions = ref<ClSelectOption[]>([
+  { label: '自动', value: 'auto' },
+  { label: '日光', value: 'daylight' },
+  { label: '阴天', value: 'cloudy' },
+  { label: '阴影', value: 'shade' },
+  { label: '钨丝灯', value: 'tungsten' },
+  { label: '荧光灯', value: 'fluorescent' },
+  { label: '闪光灯', value: 'flash' },
+]);
+
+// 可用标签
+const availableTags = [
+  { label: '街头', value: 'street' },
+  { label: '人像', value: 'portrait' },
+  { label: '风景', value: 'landscape' },
+  { label: '胶片', value: 'film' },
+  { label: '黑白', value: 'blackAndWhite' },
+];
+
+// 表单数据类型
+type FormData = {
+  name: string;
+  description: string;
+  tags: string[];
+  camera_model: string;
+  params: {
+    base_preset: string;
+    white_balance: string;
+    wb_shift: string;
+    saturation: number;
+    color_tone: number;
+    contrast: number;
+    contrast_highlight: number;
+    contrast_shadow: number;
+    sharpness: number;
+    clarity: number;
+    shadow_tone: number;
+    highlight_tone: number;
+  };
+  preview_images: string[];
+};
+
+// 表单数据
+const form = reactive<FormData>({
+  name: '',
+  description: '',
+  tags: [],
+  camera_model: 'gr3',
+  params: {
+    base_preset: 'positive',
+    white_balance: 'auto',
+    wb_shift: '',
+    saturation: 0,
+    color_tone: 0,
+    contrast: 0,
+    contrast_highlight: 0,
+    contrast_shadow: 0,
+    sharpness: 50,
+    clarity: 0,
+    shadow_tone: 0,
+    highlight_tone: 0,
+  },
+  preview_images: [],
+});
+
+const isSubmitting = ref(false);
+
+// 表单验证
+const isFormValid = computed(() => {
+  return form.name.trim() != '' && form.camera_model != '' && form.preview_images.length > 0;
+});
+
+// 判断标签是否被选中
+function isTagSelected(tagValue: string): boolean {
+  return form.tags.includes(tagValue);
+}
+
+// 切换标签
+function toggleTag(tagValue: string) {
+  const index = form.tags.indexOf(tagValue);
+  if (index != -1) {
+    form.tags.splice(index, 1);
+  } else {
+    form.tags.push(tagValue);
+  }
+  console.log('当前选中的标签:', form.tags);
+}
+
+// 提交表单
+async function handleSubmit() {
+  if (!isFormValid.value) {
+    ui.showToast({
+      message: '请填写必填项',
+      type: 'error',
+    });
+    return;
+  }
+
+  isSubmitting.value = true;
+
+  try {
+    // TODO: 调用API上传预设
+    // 模拟上传延迟
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // 构建预设数据
+    const preset = new PresetModel({
+      name: form.name,
+      description: form.description,
+      tags: form.tags,
+      camera_model: form.camera_model,
+      user_id: 'current_user_id', // TODO: 从用户状态获取
+      params: form.params,
+      preview_images: form.preview_images.map((url) => ({
+        before: url,
+        after: url,
+      })),
+      likes: 0,
+      is_bookmarked: false,
+    });
+
+    console.log('上传的预设数据:', preset);
+
+    ui.showToast({
+      message: '预设发布成功',
+      type: 'success',
+    });
+
+    // 重置表单
+    resetForm();
+  } catch (error) {
+    ui.showToast({
+      message: '发布失败，请重试',
+      type: 'error',
+    });
+    console.error('上传失败:', error);
+  } finally {
+    isSubmitting.value = false;
+  }
+}
+
+// 重置表单
+function resetForm() {
+  form.name = '';
+  form.description = '';
+  form.tags = [];
+  form.camera_model = 'gr3';
+  form.params = {
+    base_preset: 'positive',
+    white_balance: 'auto',
+    wb_shift: '',
+    saturation: 0,
+    color_tone: 0,
+    contrast: 0,
+    contrast_highlight: 0,
+    contrast_shadow: 0,
+    sharpness: 50,
+    clarity: 0,
+    shadow_tone: 0,
+    highlight_tone: 0,
+  };
+  form.preview_images = [];
+}
+</script>
+
+<style lang="scss" scoped></style>

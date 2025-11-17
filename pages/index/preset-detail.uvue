@@ -1,0 +1,192 @@
+<template>
+  <cl-page>
+    <cl-topbar
+      :pt="{
+        className: 'z-2',
+      }"
+      fixed
+      :title="preset.name"
+      color="white"
+      background-color="black"
+    ></cl-topbar>
+    <!-- 背景图片层 -->
+    <view class="fixed left-0 top-0 h-full w-full">
+      <image
+        v-if="currentImage"
+        :src="currentImage"
+        mode="aspectFill"
+        class="h-full w-full"
+        style="filter: blur(40px); transform: scale(1.1)"
+      ></image>
+      <!-- 遮罩层 -->
+      <view class="absolute left-0 top-0 h-full w-full bg-black opacity-60"></view>
+    </view>
+
+    <!-- 内容层 -->
+    <view class="relative z-10">
+      <view class="flex w-full flex-1 flex-row items-center justify-between p-3">
+        <!-- 作者信息 -->
+        <view class="flex flex-row items-center">
+          <cl-avatar :src="preset.author?.avatar_url || ''" :size="40" class="mr-2"></cl-avatar>
+          <cl-text
+            :pt="{
+              className: '!text-base font-semibold !text-white',
+            }"
+          >
+            {{ preset.author?.name || '未知作者' }}
+          </cl-text>
+        </view>
+      </view>
+
+      <view class="pb-3">
+        <!-- 图片对比区域 -->
+        <view class="relative h-[500px] w-full">
+          <!-- 原始/效果切换标签 -->
+          <!-- <view class="absolute left-4 top-4 z-10 flex flex-row">
+          <view
+            class="rounded-l-lg px-4 py-2"
+            :class="showBefore ? 'bg-surface-800 dark:bg-surface-200' : 'bg-surface-300 dark:bg-surface-600'"
+            @tap="showBefore = true"
+          >
+            <cl-text
+              :pt="{
+                className: parseClass([
+                  '!text-sm',
+                  [showBefore, '!text-white dark:!text-black', '!text-surface-600 dark:!text-surface-300'],
+                ]),
+              }"
+            >
+              原始
+            </cl-text>
+          </view>
+          <view
+            class="rounded-r-lg px-4 py-2"
+            :class="!showBefore ? 'bg-surface-800 dark:bg-surface-200' : 'bg-surface-300 dark:bg-surface-600'"
+            @tap="showBefore = false"
+          >
+            <cl-text
+              :pt="{
+                className: parseClass([
+                  '!text-sm',
+                  [!showBefore, '!text-white dark:!text-black', '!text-surface-600 dark:!text-surface-300'],
+                ]),
+              }"
+            >
+              效果
+            </cl-text>
+          </view>
+        </view> -->
+
+          <!-- 图片展示 -->
+          <image v-if="currentImage" :src="currentImage" mode="aspectFill" class="h-full w-full"></image>
+        </view>
+
+        <!-- 描述和互动区域 -->
+        <view class="m-4 rounded-2xl bg-black bg-opacity-20 p-4 backdrop-blur-md">
+          <!-- 描述 -->
+          <cl-text
+            :pt="{
+              className: '!text-base leading-relaxed !text-white',
+            }"
+          >
+            {{ preset.description }}
+          </cl-text>
+
+          <!-- 互动数据 -->
+          <view class="mt-4 flex flex-row items-center">
+            <!-- 点赞 -->
+            <view class="mr-6 flex flex-row items-center">
+              <cl-icon name="heart-line" :size="20" class="mr-1" color="#ef4444"></cl-icon>
+              <cl-text
+                :pt="{
+                  className: '!text-sm !text-white',
+                }"
+              >
+                {{ formatNumber(preset.likes) }}
+              </cl-text>
+            </view>
+
+            <!-- 收藏 -->
+            <view class="mr-6 flex flex-row items-center">
+              <cl-icon name="bookmark-line" :size="20" class="mr-1" color="#f59e0b"></cl-icon>
+              <cl-text
+                :pt="{
+                  className: '!text-sm !text-white',
+                }"
+              >
+                {{ formatNumber(Math.floor(preset.likes * 0.48)) }}
+              </cl-text>
+            </view>
+
+            <!-- 评论 -->
+            <view class="flex flex-row items-center">
+              <cl-icon name="chat-3-line" :size="20" class="mr-1" color="#ffffff"></cl-icon>
+              <cl-text
+                :pt="{
+                  className: '!text-sm !text-white',
+                }"
+              >
+                {{ formatNumber(Math.floor(preset.likes * 0.127)) }}
+              </cl-text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 参数区域 -->
+        <view class="mx-4 mb-6 rounded-2xl bg-black bg-opacity-20 p-4 backdrop-blur-md">
+          <cl-text
+            :pt="{
+              className: '!text-lg font-semibold mb-4 !text-white',
+            }"
+          >
+            参数
+          </cl-text>
+
+          <!-- 参数网格组件 -->
+          <preset-params :params="preset.params"></preset-params>
+        </view>
+      </view>
+    </view>
+  </cl-page>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+import { isMp, parseClass } from '@/cool';
+import PresetModel from '@/dataModal/PresetModel';
+import { mockImageList } from '@/data/mock';
+import PresetParams from './components/preset-params.uvue';
+
+defineOptions({
+  name: 'preset-detail',
+});
+
+// 使用第一个mock数据
+const preset = ref<PresetModel>(mockImageList[0]);
+
+// 控制显示原始图还是效果图
+const showBefore = ref(true);
+
+// 当前显示的图片
+const currentImage = computed(() => {
+  if (preset.value.preview_images.length > 0) {
+    return showBefore.value ? preset.value.preview_images[0].before : preset.value.preview_images[0].after;
+  }
+  return '';
+});
+
+// 切换图片
+function toggleImage() {
+  showBefore.value = !showBefore.value;
+}
+
+// 格式化数字（1200 -> 1.2k）
+function formatNumber(num: number): string {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k';
+  }
+  return num.toString();
+}
+</script>
+
+<style lang="scss" scoped></style>

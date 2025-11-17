@@ -1,0 +1,321 @@
+<template>
+  <view class="flex flex-row flex-wrap">
+    <!-- 基础预设 -->
+    <view v-if="params?.base_preset" class="mb-3 w-1/2 pr-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            基础预设
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ getPresetLabel(params.base_preset) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 白平衡 -->
+    <view class="mb-3 w-1/2 pl-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            白平衡
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ params?.white_balance || 'N/A' }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 白平衡偏移 -->
+    <view class="mb-3 w-1/2 pr-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            白平衡偏移
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ params?.wb_shift || 'N/A' }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 饱和度 -->
+    <view class="mb-3 w-1/2 pl-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            饱和度
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.saturation) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 色调 -->
+    <view class="mb-3 w-1/2 pr-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            色调
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.color_tone) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 对比度 -->
+    <view class="mb-3 w-1/2 pl-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            对比度
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.contrast) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 对比度高光 -->
+    <view class="mb-3 w-1/2 pr-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            对比度(高光)
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.contrast_highlight) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 对比度阴影 -->
+    <view class="mb-3 w-1/2 pl-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            对比度(阴影)
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.contrast_shadow) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 锐度 -->
+    <view class="mb-3 w-1/2 pr-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            锐度
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.sharpness) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 清晰度 -->
+    <view class="mb-3 w-1/2 pl-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            清晰度
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.clarity) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 阴影色调 -->
+    <view class="mb-3 w-1/2 pr-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            阴影色调
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.shadow_tone) }}
+        </cl-text>
+      </view>
+    </view>
+
+    <!-- 高光色调 -->
+    <view class="mb-3 w-1/2 pl-2">
+      <view class="rounded-lg bg-surface-100 p-4 dark:bg-surface-800">
+        <view class="mb-2 flex flex-row items-center">
+          <cl-text
+            :pt="{
+              className: '!text-xs opacity-60',
+            }"
+          >
+            高光色调
+          </cl-text>
+        </view>
+        <cl-text
+          :pt="{
+            className: '!text-base font-medium',
+          }"
+        >
+          {{ formatValue(params?.highlight_tone) }}
+        </cl-text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="ts">
+defineOptions({
+  name: 'preset-params',
+});
+
+// 定义 props
+type PresetParams = {
+  base_preset: string;
+  white_balance: string;
+  wb_shift: string;
+  saturation: number;
+  color_tone: number;
+  contrast: number;
+  contrast_highlight: number;
+  contrast_shadow: number;
+  sharpness: number;
+  clarity: number;
+  shadow_tone: number;
+  highlight_tone: number;
+};
+
+type Props = {
+  params: PresetParams | null;
+};
+
+const props = defineProps<Props>();
+
+// 格式化参数值（添加+/-符号）
+function formatValue(val: number | undefined): string {
+  if (val == null) return 'N/A';
+  if (val > 0) return `+${val}`;
+  return val.toString();
+}
+
+// 获取预设标签
+function getPresetLabel(value: string): string {
+  const presetMap: Record<string, string> = {
+    positive: '正片',
+    negative: '负片',
+    vivid: '鲜艳',
+    monochrome: '单色',
+    bleach_bypass: '漂白效果',
+    retro: '怀旧',
+    high_contrast_bw: '高对比度黑白',
+    soft: '柔和',
+    cinema: '电影效果',
+  };
+  return presetMap[value] || value;
+}
+</script>
+
+<style lang="scss" scoped></style>
+
