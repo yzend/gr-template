@@ -137,13 +137,21 @@ import ImageCard from './components/discover/image-card.uvue';
 import { config } from '@/config';
 import { mockImageList } from '@/data/mock';
 import type { ClSelectOption } from '@/uni_modules/cool-ui';
+import { presetApi } from '@/api/presetApi';
+import { useUi } from '@/uni_modules/cool-ui';
 
 defineOptions({
   name: 'discover',
 });
 
 const refs = useRefs();
+const ui = useUi();
 const waterfallRef = ref<ClWaterfallComponentPublicInstance | null>(null);
+
+// 加载状态
+const isLoading = ref(false);
+const currentPage = ref(1);
+const pageSize = ref(20);
 
 // 上传时间选项
 const uploadTimeOptions = ref<ClSelectOption[]>([
@@ -170,16 +178,56 @@ const selectedTags = ref<string[]>([]);
 const tagsFilterVisible = ref(false);
 
 // 初始化瀑布流数据
-function initWaterfall() {
-  if (waterfallRef.value != null) {
-    waterfallRef.value.append(mockImageList);
+async function initWaterfall() {
+  if (isLoading.value) {
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    // 从 API 获取预设列表
+    const result = await presetApi.getList({
+      page: currentPage.value,
+      pageSize: pageSize.value,
+      sort: uploadTime.value as 'latest' | 'popular',
+      tags: selectedTags.value.length > 0 ? selectedTags.value : undefined,
+    });
+
+    console.log('获取预设列表成功:', result);
+
+    if (waterfallRef.value != null && result.list != null) {
+      // 将获取的数据追加到瀑布流
+      waterfallRef.value.append(result.list);
+    }
+  } catch (error) {
+    console.error('获取预设列表失败:', error);
+    ui.showToast({
+      message: '加载失败，请稍后重试',
+      type: 'error',
+    });
+
+    // 如果 API 请求失败，使用模拟数据作为后备
+    if (waterfallRef.value != null) {
+      waterfallRef.value.append(mockImageList);
+    }
+  } finally {
+    isLoading.value = false;
   }
 }
 
 function onUploadTimeChange(value: string | number) {
   uploadTime.value = value;
   console.log('上传时间改变:', value);
-  // TODO: 根据上传时间筛选图片
+
+  // 重置页码并清空瀑布流
+  currentPage.value = 1;
+  if (waterfallRef.value != null) {
+    waterfallRef.value.clear();
+  }
+
+  // 重新加载数据
+  initWaterfall();
 }
 
 function openTagsFilter() {
@@ -193,7 +241,25 @@ function resetTags() {
 function confirmTags() {
   tagsFilterVisible.value = false;
   console.log('已选择 Tags:', selectedTags.value);
-  // TODO: 根据 Tags 筛选图片
+
+  // 重置页码并清空瀑布流
+  currentPage.value = 1;
+  if (waterfallRef.value != null) {
+    waterfallRef.value.clear();
+  }
+
+  // 重新加载数据
+  initWaterfall();
+}
+
+// 加载更多数据
+async function loadMore() {
+  if (isLoading.value) {
+    return;
+  }
+
+  currentPage.value += 1;
+  await initWaterfall();
 }
 
 function onImageTap(item: any) {

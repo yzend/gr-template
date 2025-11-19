@@ -25,6 +25,7 @@ type Config = {
   isCustomTabBar: boolean; // 是否自定义 tabBar
   backTop: boolean; // 是否显示回到顶部按钮
   wx: WxConfig; // 微信配置
+  apiKey: string; // 支付公钥
 };
 
 // 根据环境导出最终配置
@@ -40,6 +41,8 @@ export const config = {
     debug: false,
   },
   ...(isDev ? dev() : prod()),
+  apiKey:
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6IjlkMWRjMzFlLWI0ZDAtNDQ4Yi1hNzZmLWIwY2M2M2Q4MTQ5OCJ9.eyJhdWQiOiJkZW1vLThnMHdxMHRzY2VmZWIwZTEiLCJleHAiOjI1MzQwMjMwMDc5OSwiaWF0IjoxNzYzNTY5NDY5LCJhdF9oYXNoIjoiT09Oa0ZNVmtFZkNtbGxKVUFKTGJxdyIsInByb2plY3RfaWQiOiJkZW1vLThnMHdxMHRzY2VmZWIwZTEiLCJtZXRhIjp7InBsYXRmb3JtIjoiQXBpS2V5In0sImFkbWluaXN0cmF0b3JfaWQiOiIxOTg5MjU2MjA0NDcwNjgxNjAxIiwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfc2VydmVyIiwiaXNfc3lzdGVtX2FkbWluIjp0cnVlfQ.K8U-oheU3KrnqFAZnvIPWF_WU2Mm8dYuj9J1vbSDh3m-DxZWZEppCnpAMCiGfPmjnau1GPHr8SpnkBCNb0gJtX6toGcHn2WeW7SDE6nUtpSSPktUf7jy1PugTpQZdaihHmvURrOVeI63zBGl5WpkIpWT828SCM3UwHDDNhfw4ynZsMYOGmi5sLSF-U69oMaxD30QE-XSyiocDhXTwwPQjEaJTml6Hql-qHamNBYeh6PHr6PMkpWA4KINYwB4l-6PQDSznAcZNK0Plxda_qwnXGwAs7T4EKBtWkdbDkK4m3uQgeYNRjDBogA6e5lbewh5EnPphnQj-v-coEdojm8KLg',
 } as Config;
 
 // 导出代理相关配置

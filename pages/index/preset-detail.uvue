@@ -2,8 +2,10 @@
   <cl-page>
     <cl-topbar
       :pt="{
-        className: 'z-2',
+        className: '!z-50',
       }"
+      safe-area-top
+      :height="isMp() ? null : 100"
       fixed
       :title="preset.name"
       color="white"
@@ -40,7 +42,7 @@
 
       <view class="pb-3">
         <!-- 图片对比区域 -->
-        <view class="relative h-[500px] w-full">
+        <view class="relative h-[300px] w-full overflow-hidden rounded-2xl p-4">
           <!-- 原始/效果切换标签 -->
           <!-- <view class="absolute left-4 top-4 z-10 flex flex-row">
           <view
@@ -78,11 +80,18 @@
         </view> -->
 
           <!-- 图片展示 -->
-          <image v-if="currentImage" :src="currentImage" mode="aspectFill" class="h-full w-full"></image>
+          <cl-image
+            v-if="currentImage"
+            :src="currentImage"
+            height="100%"
+            width="100%"
+            mode="aspectFill"
+            class="h-full w-full"
+          ></cl-image>
         </view>
 
         <!-- 描述和互动区域 -->
-        <view class="m-4 rounded-2xl bg-black bg-opacity-20 p-4 backdrop-blur-md">
+        <view class="m-4 rounded-2xl bg-black/60 bg-opacity-20 p-4 backdrop-blur-md">
           <!-- 描述 -->
           <cl-text
             :pt="{
@@ -93,47 +102,23 @@
           </cl-text>
 
           <!-- 互动数据 -->
-          <view class="mt-4 flex flex-row items-center">
+          <view class="mt-4 flex flex-row items-center justify-end">
             <!-- 点赞 -->
             <view class="mr-6 flex flex-row items-center">
-              <cl-icon name="heart-line" :size="20" class="mr-1" color="#ef4444"></cl-icon>
+              <cl-icon name="bookmark-line" :size="36" class="mr-2" color="#f59e0b"></cl-icon>
               <cl-text
                 :pt="{
-                  className: '!text-sm !text-white',
+                  className: '!text-md !text-white',
                 }"
               >
                 {{ formatNumber(preset.likes) }}
-              </cl-text>
-            </view>
-
-            <!-- 收藏 -->
-            <view class="mr-6 flex flex-row items-center">
-              <cl-icon name="bookmark-line" :size="20" class="mr-1" color="#f59e0b"></cl-icon>
-              <cl-text
-                :pt="{
-                  className: '!text-sm !text-white',
-                }"
-              >
-                {{ formatNumber(Math.floor(preset.likes * 0.48)) }}
-              </cl-text>
-            </view>
-
-            <!-- 评论 -->
-            <view class="flex flex-row items-center">
-              <cl-icon name="chat-3-line" :size="20" class="mr-1" color="#ffffff"></cl-icon>
-              <cl-text
-                :pt="{
-                  className: '!text-sm !text-white',
-                }"
-              >
-                {{ formatNumber(Math.floor(preset.likes * 0.127)) }}
               </cl-text>
             </view>
           </view>
         </view>
 
         <!-- 参数区域 -->
-        <view class="mx-4 mb-6 rounded-2xl bg-black bg-opacity-20 p-4 backdrop-blur-md">
+        <view class="mx-4 mb-6 rounded-2xl bg-black/60 bg-opacity-20 p-4 backdrop-blur-md">
           <cl-text
             :pt="{
               className: '!text-lg font-semibold mb-4 !text-white',
