@@ -20,7 +20,7 @@
             className: '!text-xl mr-auto ml-2 flex-1',
           }"
         >
-          上传预设
+          {{ isEditMode ? '编辑预设' : '上传预设' }}
         </cl-text>
       </view>
     </cl-topbar>
@@ -36,7 +36,7 @@
           >
             最多添加 5 张图片（建议使用原始 JPG）
           </cl-text>
-          <cl-upload v-model="form.preview_images" multiple :limit="5" test></cl-upload>
+          <cl-upload v-model:modelValue="form.preview_images" multiple :limit="5" test></cl-upload>
         </cl-form-item>
 
         <!-- 相机型号 -->
@@ -89,8 +89,9 @@
         <!-- 描述您的预设 -->
         <cl-form-item label="描述您的预设">
           <cl-textarea
-            v-model="form.description"
+            v-model:modelValue="form.description"
             placeholder="例如：使用场景、光线条件、拍摄时间..."
+            count
             :show-word-limit="true"
             :maxlength="500"
             :height="240"
@@ -101,12 +102,12 @@
         <cl-row :gutter="20">
           <cl-col :span="12">
             <cl-form-item label="白平衡">
-              <cl-select v-model="form.params.white_balance" :options="whiteBalanceOptions"></cl-select>
+              <cl-select showConfirm v-model="form.params.white_balance" :options="whiteBalanceOptions"></cl-select>
             </cl-form-item>
           </cl-col>
           <cl-col :span="12">
             <cl-form-item label="白平衡偏移">
-              <cl-input v-model="form.params.wb_shift" placeholder="例如: +2"></cl-input>
+              <cl-input v-model:modelValue="form.params.wb_shift" placeholder="例如: +2"></cl-input>
             </cl-form-item>
           </cl-col>
         </cl-row>
@@ -115,30 +116,30 @@
         <cl-row :gutter="20">
           <cl-col :span="12">
             <cl-form-item label="饱和度">
-              <cl-slider v-model="form.params.saturation" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.saturation" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
           <cl-col :span="12">
             <cl-form-item label="色调">
-              <cl-slider v-model="form.params.color_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.color_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
         </cl-row>
 
         <!-- 对比度、高光、阴影 -->
         <cl-form-item label="对比度">
-          <cl-slider v-model="form.params.contrast" :min="-100" :max="100" :show-value="true"></cl-slider>
+          <cl-slider v-model:modelValue="form.params.contrast" :min="-100" :max="100" :show-value="true"></cl-slider>
         </cl-form-item>
 
         <cl-row :gutter="20">
           <cl-col :span="12">
             <cl-form-item label="高光">
-              <cl-slider v-model="form.params.contrast_highlight" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.contrast_highlight" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
           <cl-col :span="12">
             <cl-form-item label="阴影">
-              <cl-slider v-model="form.params.contrast_shadow" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.contrast_shadow" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
         </cl-row>
@@ -147,12 +148,12 @@
         <cl-row :gutter="20">
           <cl-col :span="12">
             <cl-form-item label="锐度">
-              <cl-slider v-model="form.params.sharpness" :min="0" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.sharpness" :min="0" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
           <cl-col :span="12">
             <cl-form-item label="清晰度">
-              <cl-slider v-model="form.params.clarity" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.clarity" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
         </cl-row>
@@ -161,12 +162,12 @@
         <cl-row :gutter="20">
           <cl-col :span="12">
             <cl-form-item label="暗部色调">
-              <cl-slider v-model="form.params.shadow_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.shadow_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
           <cl-col :span="12">
             <cl-form-item label="亮部色调">
-              <cl-slider v-model="form.params.highlight_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
+              <cl-slider v-model:modelValue="form.params.highlight_tone" :min="-100" :max="100" :show-value="true"></cl-slider>
             </cl-form-item>
           </cl-col>
         </cl-row>
@@ -184,7 +185,7 @@
           className: 'w-full !bg-black dark:!bg-white',
         }"
       >
-        发布预设
+        {{ isEditMode ? '更新预设' : '发布预设' }}
       </cl-button>
     </view>
 
@@ -194,20 +195,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
-import { isDark, isMp, parseClass } from '@/cool';
+import { ref, computed, reactive, onMounted } from 'vue';
+import { isDark, isMp, parseClass, router } from '@/cool';
 import CustomTabbar from '@/components/tabbar.uvue';
 import CameraModelSelect from '@/components/SelectModule/CameraModelSelect.uvue';
 import BasePresetSelect from '@/components/SelectModule/BasePresetSelect.uvue';
 import PresetModel from '@/dataModal/PresetModel';
 import type { ClSelectOption } from '@/uni_modules/cool-ui';
 import { useUi } from '@/uni_modules/cool-ui';
+import { presetCreate, presetUpdate, presetGetDetail } from '@/api/presetApi';
+import { uploadFiles } from '@/api/uploadApi';
 
 defineOptions({
   name: 'upload-preset',
 });
 
 const ui = useUi();
+
+// 接收路由参数（编辑模式）
+const props = defineProps<{
+  id?: string;
+}>();
+
+// 是否为编辑模式
+const isEditMode = computed(() => {
+  if (props.id != null && props.id != '') {
+    return true;
+  }
+  return presetId.value != null && presetId.value != '';
+});
+
+// 预设ID（编辑模式使用）
+const presetId = ref<string | null>(null);
 
 // 白平衡选项
 const whiteBalanceOptions = ref<ClSelectOption[]>([
@@ -279,7 +298,8 @@ const isSubmitting = ref(false);
 
 // 表单验证
 const isFormValid = computed(() => {
-  return form.name.trim() != '' && form.camera_model != '' && form.preview_images.length > 0;
+  // return form.name.trim() != '' && form.camera_model != '' && form.preview_images.length > 0;
+  return true;
 });
 
 // 判断标签是否被选中
@@ -298,8 +318,46 @@ function toggleTag(tagValue: string) {
   console.log('当前选中的标签:', form.tags);
 }
 
+// 加载预设详情（编辑模式）
+async function loadPresetDetail(id: string) {
+  try {
+    const preset = await presetGetDetail(id);
+    presetId.value = preset.id;
+
+    // 填充表单数据
+    form.name = preset.name;
+    form.description = preset.description;
+    form.tags = preset.tags || [];
+    form.camera_model = preset.camera_model;
+    form.preview_images = preset.preview_images.map((img) => img.before);
+
+    // 填充参数数据
+    if (preset.params != null) {
+      form.params.base_preset = preset.params.base_preset;
+      form.params.white_balance = preset.params.white_balance;
+      form.params.wb_shift = preset.params.wb_shift;
+      form.params.saturation = preset.params.saturation;
+      form.params.color_tone = preset.params.color_tone;
+      form.params.contrast = preset.params.contrast;
+      form.params.contrast_highlight = preset.params.contrast_highlight;
+      form.params.contrast_shadow = preset.params.contrast_shadow;
+      form.params.sharpness = preset.params.sharpness;
+      form.params.clarity = preset.params.clarity;
+      form.params.shadow_tone = preset.params.shadow_tone;
+      form.params.highlight_tone = preset.params.highlight_tone;
+    }
+  } catch (error) {
+    console.error('加载预设详情失败:', error);
+    ui.showToast({
+      message: '加载预设失败',
+      type: 'error',
+    });
+  }
+}
+
 // 提交表单
 async function handleSubmit() {
+  console.log('提交表单', form);
   if (!isFormValid.value) {
     ui.showToast({
       message: '请填写必填项',
@@ -311,41 +369,94 @@ async function handleSubmit() {
   isSubmitting.value = true;
 
   try {
-    // TODO: 调用API上传预设
-    // 模拟上传延迟
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // 上传预览图片
+    let uploadedUrls: string[] = [];
 
-    // 构建预设数据
-    const preset = new PresetModel({
-      name: form.name,
-      description: form.description,
-      tags: form.tags,
-      camera_model: form.camera_model,
-      user_id: 'current_user_id', // TODO: 从用户状态获取
-      params: form.params,
-      preview_images: form.preview_images.map((url) => ({
-        before: url,
-        after: url,
-      })),
-      likes: 0,
-      is_bookmarked: false,
-    });
+    if (form.preview_images.length > 0) {
+      // 过滤出需要上传的文件（本地路径，非网络 URL）
+      const filesToUpload = form.preview_images.filter((url) => {
+        // 如果已经是网络 URL，不需要上传
+        return !url.startsWith('http://') && !url.startsWith('https://');
+      });
 
-    console.log('上传的预设数据:', preset);
+      // 如果存在需要上传的文件
+      if (filesToUpload.length > 0) {
+        ui.showLoading('正在上传图片...', true);
 
-    ui.showToast({
-      message: '预设发布成功',
-      type: 'success',
-    });
+        try {
+          // 批量上传文件
+          uploadedUrls = await uploadFiles(filesToUpload, {
+            path: 'presets/preview',
+          });
+        } finally {
+          // 关闭加载提示
+          ui.hideLoading();
+        }
 
-    // 重置表单
-    resetForm();
+        if (uploadedUrls.length != filesToUpload.length) {
+          throw new Error('部分图片上传失败');
+        }
+      }
+
+      // 合并已上传的 URL 和已有的网络 URL
+      const existingUrls = form.preview_images.filter(
+        (url) => url.startsWith('http://') || url.startsWith('https://')
+      );
+      uploadedUrls = [...uploadedUrls, ...existingUrls];
+    }
+
+    // 构建预览图片数据
+    const previewImages = uploadedUrls.map((url) => ({
+      before: url,
+      after: url,
+    }));
+
+    if (isEditMode.value && presetId.value != null) {
+      // 更新预设
+      await presetUpdate({
+        id: presetId.value,
+        name: form.name,
+        description: form.description,
+        tags: form.tags.length > 0 ? form.tags : undefined,
+        camera_model: form.camera_model,
+        params: form.params,
+        preview_images: previewImages,
+      });
+
+      ui.showToast({
+        message: '预设更新成功',
+        type: 'success',
+      });
+
+      // 返回上一页
+      setTimeout(() => {
+        uni.navigateBack();
+      }, 1500);
+    } else {
+      // 创建预设
+      await presetCreate({
+        name: form.name,
+        description: form.description,
+        tags: form.tags.length > 0 ? form.tags : undefined,
+        camera_model: form.camera_model,
+        params: form.params,
+        preview_images: previewImages,
+      });
+
+      ui.showToast({
+        message: '预设发布成功',
+        type: 'success',
+      });
+
+      // 重置表单
+      resetForm();
+    }
   } catch (error) {
     ui.showToast({
-      message: '发布失败，请重试',
+      message: isEditMode.value ? '更新失败，请重试' : '发布失败，请重试',
       type: 'error',
     });
-    console.error('上传失败:', error);
+    console.error('提交失败:', error);
   } finally {
     isSubmitting.value = false;
   }
@@ -372,7 +483,28 @@ function resetForm() {
     highlight_tone: 0,
   };
   form.preview_images = [];
+  presetId.value = null;
 }
+
+// 页面加载时检查是否为编辑模式
+onMounted(() => {
+  // 从路由查询参数获取 id
+  const query = router.query();
+  let id: string | undefined = props.id;
+
+  // 如果 props 中没有 id，尝试从 query 中获取
+  if (id == null || id == '') {
+    const queryId = query.id;
+    if (queryId != null) {
+      id = String(queryId);
+    }
+  }
+
+  if (id != null && id != '') {
+    // 编辑模式：加载预设详情
+    loadPresetDetail(id);
+  }
+});
 </script>
 
 <style lang="scss" scoped></style>

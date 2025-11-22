@@ -137,7 +137,7 @@ import ImageCard from './components/discover/image-card.uvue';
 import { config } from '@/config';
 import { mockImageList } from '@/data/mock';
 import type { ClSelectOption } from '@/uni_modules/cool-ui';
-import { presetApi } from '@/api/presetApi';
+import { presetGetList } from '@/api/presetApi';
 import { useUi } from '@/uni_modules/cool-ui';
 
 defineOptions({
@@ -187,7 +187,7 @@ async function initWaterfall() {
 
   try {
     // 从 API 获取预设列表
-    const result = await presetApi.getList({
+    const result = await presetGetList({
       page: currentPage.value,
       pageSize: pageSize.value,
       sort: uploadTime.value as 'latest' | 'popular',
