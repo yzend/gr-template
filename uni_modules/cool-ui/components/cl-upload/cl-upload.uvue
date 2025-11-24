@@ -338,7 +338,7 @@ function choose(index: number) {
 					// 测试用，本地预览
 					if (props.test) {
 						update(uid, { url: file.path, progress: 100 });
-						emit("success", file.path, uid);
+						emit("success", file.path, file.name, uid);
 						return;
 					}
 
@@ -353,7 +353,7 @@ function choose(index: number) {
 						.then((url) => {
 							// 上传成功，更新URL和进度
 							update(uid, { url, progress: 100 });
-							emit("success", url, uid);
+							emit("success", url, file.name, uid);
 						})
 						.catch((err) => {
 							// 上传失败，触发错误事件并删除该项
