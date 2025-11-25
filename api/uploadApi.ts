@@ -2,15 +2,13 @@ import { config } from '@/config';
 import { uuid } from '@/cool/utils/comm';
 
 // 上传云函数基础URL
-const UPLOAD_FUNCTION_URL =
-  'https://demo-8g0wq0tscefeb0e1.api.tcloudbasegateway.com/v1/functions/upload?webfn=true';
+const UPLOAD_FUNCTION_URL = 'https://upload-raeettzqcw.cn-hangzhou.fcapp.run/upload';
 
 // 获取请求头
 function getHeaders() {
   return {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    Authorization: `Bearer ${config.apiKey}`,
   };
 }
 
@@ -329,9 +327,11 @@ export async function uploadFiles(
   const results = await Promise.all(uploadPromises);
 
   // 提取 URL
+  const domain = 'https://6465-demo-8g0wq0tscefeb0e1-1258743129.tcb.qcloud.la/'
   return results.map((result) => {
-    if (result != null && result.url != null) {
-      return result.url;
+    console.log('上传结果:', result);
+    if (result != null && result.cloudPath != null) {
+      return domain + result.cloudPath;
     }
     return '';
   }).filter((url) => url != '');
